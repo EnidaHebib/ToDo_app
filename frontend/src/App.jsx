@@ -6,12 +6,12 @@ import Register from "./pages/Register";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 import UpdateTask from "./components/UpdateTask";
+import Footer from "./components/Footer"; // Import Footer
 import "./App.css";
 
 function App() {
-  // Example: Assume the user is logged in.
-  const isLoggedIn = false;  // Change to true if the user is logged in
-  const userName = "Mike"; // Dynamic user name (can come from state or context)
+  const isLoggedIn = false;  
+  const userName = "Mike"; 
 
   return (
     <>
@@ -27,6 +27,7 @@ function App() {
           <Route path="/update-task/:id" element={<UpdateTask />} />
         </Routes>
       </div>
+      <Footer /> {/* Add Footer here */}
     </>
   );
 }
