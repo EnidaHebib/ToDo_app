@@ -1,14 +1,17 @@
-import TaskForm from "../components/TaskForm";
+import TaskBoard from "../components/TaskBoard"; // Import TaskBoard
+import Dashboard from "../components/Dashboard"; // Import Dashboard
 
 const Home = () => {
-    return (
-        <div className="flex justify-center items-center h-screen bg-accent">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-                <h1 className="text-3xl font-semibold text-center mb-6 text-primary">Task Manager</h1>
-                <TaskForm />
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex h-screen pt-16"> {/* Add padding-top to avoid overlap with fixed navbar */}
+      <Dashboard /> {/* Sidebar */}
+      
+      {/* Main Content Area */}
+      <div className="flex-1 p-6">
+        <TaskBoard /> {/* Task Board */}
+      </div>
+    </div>
+  );
 };
 
 export default Home;

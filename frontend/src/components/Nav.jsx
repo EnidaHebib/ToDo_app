@@ -1,16 +1,30 @@
-import {useState} from 'react'
+import { useState } from 'react';
 import { Link } from "react-router-dom";
 
 const Nav = ({ isLoggedIn, userName }) => {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user"))||"")
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || "");
+
+  const logout = () => {
+    localStorage.removeItem("user");  // Remove user from localStorage
+    setUser(null);  // Update state to reflect the user is logged out
+  };
+
   return (
-    <nav className="bg-primary text-gray-800 p-4 font-sans">
+    <nav className="bg-transparent text-gray-800 p-4 font-sans fixed w-full top-0 left-0 z-10">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Taskly hello {user?user.name:""} </h1>
+        <h1 className="text-2xl font-semibold">{user ? `Hello, ${user.name}` : "Welcome to Taskly"}</h1>
         <div className="space-x-6">
           <Link to="/" className="btn btn-ghost hover:bg-hover">Home</Link>
-          {isLoggedIn ? (
-            <span className="text-lg">{userName}</span>  // Display user name if logged in
+          {user ? (
+            <>
+              <span className="text-lg">{user.name}</span>
+              <button
+                onClick={logout}
+                className="btn btn-ghost hover:bg-hover"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <Link to="/login" className="btn btn-ghost hover:bg-hover">Login</Link>

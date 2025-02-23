@@ -1,51 +1,44 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+
+  // Clear inputs on component mount
+  useEffect(() => {
+    setEmail("");
+    setName("");
+    setPassword("");
+    setConfirmPassword("");
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      alert("Passwords do not match");
       return;
     }
 
     try {
-      // const response = await fetch('http://localhost:5001/api/users/register', { // Ensure the URL is correct
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   // body: JSON.stringify({ email, password })
-      //   body: { email, password },
-      // });
-
-
-      // if (!response.ok) {
-      //   throw new Error('Registration failed');
-      // }
-
-      // const data = await response.json();
-      const data = { email, password,name };
-      const response = await axios.post('http://localhost:5001/api/users/register', data);
-      console.log('User registered:',response.data);
-      navigate('/login'); // Redirect to the login page
+      const data = { email, name, password };
+      const response = await axios.post("http://localhost:5001/api/users/register", data);
+      console.log("User registered:", response.data);
+      navigate("/login"); // Redirect to the login page
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
           <input
@@ -56,18 +49,20 @@ const Register = () => {
             required
             className="input input-bordered w-full"
             placeholder="Enter your email"
+            autoComplete="off"
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium mb-2">User name</label>
+          <label htmlFor="name" className="block text-sm font-medium mb-2">User Name</label>
           <input
-            id="email"
+            id="name"  // ✅ Fixed incorrect ID
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
             className="input input-bordered w-full"
             placeholder="Enter your name"
+            autoComplete="off"
           />
         </div>
         <div className="mb-4">
@@ -80,6 +75,7 @@ const Register = () => {
             required
             className="input input-bordered w-full"
             placeholder="Enter your password"
+            autoComplete="new-password"
           />
         </div>
         <div className="mb-4">
@@ -92,6 +88,7 @@ const Register = () => {
             required
             className="input input-bordered w-full"
             placeholder="Confirm your password"
+            autoComplete="new-password"
           />
         </div>
         <button type="submit" className="btn btn-outline btn-success w-full mt-4">Register</button>
