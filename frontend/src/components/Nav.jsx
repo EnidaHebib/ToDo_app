@@ -12,7 +12,11 @@ const Nav = ({ isLoggedIn, userName }) => {
   return (
     <nav className="bg-transparent text-gray-800 p-4 font-sans fixed w-full top-0 left-0 z-10">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">{user ? `Hello, ${user.name}` : "Welcome to Taskly"}</h1>
+        {/* Updated font to a more curvy style (Cursive) and set text color to black */}
+        <h1 className="text-2xl font-cursive font-semibold" style={{ marginLeft: '2.5cm', color: 'black' }}>
+          {user ? `Hello, ${user.name}` : "Welcome to Taskly"}
+        </h1>
+        
         <div className="space-x-6">
           <Link to="/" className="btn btn-ghost hover:bg-hover">Home</Link>
           {user ? (
