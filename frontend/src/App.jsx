@@ -28,7 +28,7 @@ function App() {
     <>
       <Nav isLoggedIn={user !== null} userName={user ? user.name : ''} logout={logoutUser} />
       <div className="container mx-auto p-6">
-        <h1 className="text-4xl text-center mb-6"></h1>
+        <h1 className="text-4xl text-center mb-6"></h1> {/* Updated Title */}
         <Routes>
           <Route path="/" element={<Home />} /> {/* Render Home here */}
           <Route path="/login" element={<Login loginUser={loginUser} />} />

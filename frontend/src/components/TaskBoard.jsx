@@ -2,9 +2,13 @@ import { useState, useEffect } from "react";
 
 const TaskBoard = () => {
   const [boardTasks, setBoardTasks] = useState([]);
-  const [newTask, setNewTask] = useState({ title: "", status: "" });
-  const [addingStatus, setAddingStatus] = useState(null);
+  const [newTasks, setNewTasks] = useState({
+    "To Start": "",
+    "In Progress": "",
+    "Completed": "",
+  });
 
+  // Fetch tasks from backend
   useEffect(() => {
     fetch("http://localhost:5001/api/board-tasks")
       .then((res) => res.json())
@@ -12,143 +16,84 @@ const TaskBoard = () => {
       .catch((err) => console.error("Error fetching tasks:", err));
   }, []);
 
-  const handleAddTask = async () => {
-    if (!newTask.title) return;
+  // Add Task
+  const handleAddTask = async (status) => {
+    if (!newTasks[status].trim()) return;
+
     try {
       const response = await fetch("http://localhost:5001/api/board-tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTask),
+        body: JSON.stringify({ title: newTasks[status], status }),
       });
+
       if (response.ok) {
         const createdTask = await response.json();
         setBoardTasks([...boardTasks, createdTask]);
-        setNewTask({ title: "", status: "" });
-        setAddingStatus(null);
+        setNewTasks({ ...newTasks, [status]: "" });
       }
     } catch (error) {
       console.error("Error adding task:", error);
     }
   };
 
-  const handleUpdateStatus = async (taskId, newStatus) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5001/api/board-tasks/${taskId}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
-      if (response.ok) {
-        const updatedTask = await response.json();
-        setBoardTasks(
-          boardTasks.map((task) =>
-            task._id === taskId ? updatedTask : task
-          )
-        );
-      }
-    } catch (error) {
-      console.error("Error updating task status:", error);
-    }
-  };
-
+  // Delete Task
   const handleDeleteTask = async (taskId) => {
     try {
       const response = await fetch(
         `http://localhost:5001/api/board-tasks/${taskId}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
+
       if (response.ok) {
-        setBoardTasks(boardTasks.filter((task) => task._id !== taskId));
+        setBoardTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
       }
     } catch (error) {
       console.error("Error deleting task:", error);
     }
   };
 
+  // Render Task Column
   const renderColumn = (status, bgColor) => (
     <div className={`${bgColor} p-4 rounded-lg shadow-md`}>
       <h2 className="text-xl font-semibold mb-3">{status}</h2>
+
+      {/* Task List */}
       {boardTasks
         .filter((task) => task.status === status)
         .map((task) => (
           <div
             key={task._id}
-            className="bg-white p-3 mt-2 shadow rounded-lg flex flex-col justify-between items-start"
+            className="bg-white p-3 mt-2 shadow rounded-lg flex justify-between items-start relative"
           >
-            <div
-              className="text-lg font-semibold mb-2"
-              style={{
-                whiteSpace: "pre-wrap", // Added to preserve line breaks
-                wordBreak: "break-word", // Ensure long words break correctly
-              }}
-            >
+            <span className="text-lg whitespace-pre-wrap break-words w-full pr-6">
               {task.title}
-            </div>
-
-            <div className="flex flex-col space-y-2 w-full">
-              {status === "To Start" && (
-                <>
-                  <button
-                    onClick={() => handleUpdateStatus(task._id, "In Progress")}
-                    className="btn btn-outline btn-yellow w-full"
-                  >
-                    In Progress
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus(task._id, "Completed")}
-                    className="btn btn-outline btn-green w-full"
-                  >
-                    Completed
-                  </button>
-                </>
-              )}
-              {status === "In Progress" && (
-                <button
-                  onClick={() => handleUpdateStatus(task._id, "Completed")}
-                  className="btn btn-outline btn-green w-full"
-                >
-                  Completed
-                </button>
-              )}
-            </div>
-
+            </span>
             <button
               onClick={() => handleDeleteTask(task._id)}
-              className="text-red-500 font-bold text-lg mt-3"
+              className="text-red-500 font-bold text-xl hover:text-red-700 transition absolute top-2 right-2"
             >
               ✖
             </button>
           </div>
         ))}
-      {addingStatus === status ? (
-        <div className="mt-4">
-          <textarea
-            placeholder="Task title"
-            value={newTask.title}
-            onChange={(e) => setNewTask({ title: e.target.value, status })}
-            className="w-full p-2 border rounded text-sm break-words resize-none"
-            rows="4"
-          />
-          <button
-            onClick={handleAddTask}
-            className="mt-2 w-full bg-blue-500 text-white p-2 rounded"
-          >
-            Add Task
-          </button>
-        </div>
-      ) : (
+
+      {/* Input for adding new task */}
+      <div className="mt-4">
+        <textarea
+          placeholder="Enter a task..."
+          value={newTasks[status]}
+          onChange={(e) => setNewTasks({ ...newTasks, [status]: e.target.value })}
+          className="w-full p-3 border rounded text-sm resize-none"
+          rows="3"
+        />
         <button
-          onClick={() => setAddingStatus(status)}
-          className="mt-4 w-full py-2 bg-gray-300 text-center rounded-lg hover:bg-gray-400 transition-colors"
+          onClick={() => handleAddTask(status)}
+          className="mt-2 w-full bg-gray-200 text-black text-lg py-2 rounded-lg hover:bg-gray-300 transition"
         >
           <span className="mr-2">+</span> Add New
         </button>
-      )}
+      </div>
     </div>
   );
 
