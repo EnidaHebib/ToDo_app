@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const navigate=useNavigate()
+const Login = ({ loginUser }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   // Add your login logic here (e.g., API request)
-  //   console.log('Login form submitted with:', { email, password });
-  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');  // Clear previous error
+
     try {
-      localStorage.removeItem("user")
-      // const user = { email, password };
       const response = await fetch("http://localhost:5001/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -23,14 +19,22 @@ const Login = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to login");
+        throw new Error("Failed to login, check your credentials.");
       }
 
       const result = await response.json();
-      localStorage.setItem("user",JSON.stringify(result.user))
-      navigate("/"); // Navigate to the home page
+      console.log(result);  // Log the response to check if it contains the user object
+
+      if (result.user) {
+        // Successfully logged in
+        localStorage.setItem("user", JSON.stringify(result.user));  // Save user in localStorage
+        loginUser(result.user);  // Update state in App.jsx
+        navigate("/");  // Redirect to home page
+      } else {
+        throw new Error("Login failed, user data missing.");
+      }
     } catch (error) {
-      console.error("Error:", error);
+      setError(error.message);  // Show error if login fails
     }
   };
 
@@ -62,6 +66,7 @@ const Login = () => {
             placeholder="Enter your password"
           />
         </div>
+        {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
         <button type="submit" className="btn btn-outline btn-success w-full mt-4">Login</button>
       </form>
     </div>
