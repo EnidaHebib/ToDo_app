@@ -3,19 +3,33 @@ import { useNavigate } from "react-router-dom";
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const handleAddNewTask = () => {
-    navigate("/add-task");
-  };
+  const menuItems = [
+    { label: "Add New Task", path: "/add-task", icon: "➕" },
+    { label: "Calendar View", path: "/calendar", icon: "📅" },
+    { label: "Notepad", path: "/notepad", icon: "📝" },
+    { label: "Event Reminder", path: "/event-reminder", icon: "⏰" },
+    { label: "Personal", path: "/personal", icon: "✨" },
+  ];
 
   return (
-    <div className="w-64 p-6 bg-gray-600 text-white h-screen fixed left-0 top-0 flex flex-col justify-start pt-16">
-      <h1 className="text-xl font-semibold mb-6 text-center">Taskly Dashboard</h1>
-      <button
-        className="w-full py-3 bg-gray-300 text-black text-lg rounded-lg hover:bg-gray-400 transition"
-        onClick={handleAddNewTask}
-      >
-        <span className="mr-2">+</span> Add New Task
-      </button>
+    <div className="w-64 p-6 bg-gray-900 text-white h-screen fixed left-0 top-0 flex flex-col items-center">
+      {/* Dashboard Title - Placed Lower */}
+      <h1 className="mt-12 text-3xl font-bold tracking-wide text-white/90 drop-shadow-lg">
+        Dashboard
+      </h1>
+
+      {/* Menu Items - Perfectly Centered */}
+      <div className="flex flex-col items-center gap-6 mt-auto mb-auto">
+        {menuItems.map((item, index) => (
+          <button
+            key={index}
+            className="flex items-center px-8 py-4 rounded-full bg-white/10 backdrop-blur-md text-lg font-medium text-white shadow-lg transition-all duration-300 hover:bg-white/20 hover:scale-105"
+            onClick={() => navigate(item.path)}
+          >
+            <span className="mr-3 text-xl">{item.icon}</span> {item.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
