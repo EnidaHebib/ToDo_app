@@ -7,7 +7,7 @@ const TaskBoard = () => {
     "In Progress": "",
     "Completed": "",
   });
-  const [editingTask, setEditingTask] = useState(null); // Track which task is being edited
+  const [editingTask, setEditingTask] = useState(null);
 
   // Fetch tasks from backend
   useEffect(() => {
@@ -23,6 +23,11 @@ const TaskBoard = () => {
 
     try {
       let response;
+      const updatedTask = {
+        title: newTasks[status],
+        status,
+      };
+
       if (editingTask) {
         // Update existing task
         response = await fetch(
@@ -30,7 +35,7 @@ const TaskBoard = () => {
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: newTasks[status], status }),
+            body: JSON.stringify(updatedTask),
           }
         );
       } else {
@@ -38,15 +43,15 @@ const TaskBoard = () => {
         response = await fetch("http://localhost:5001/api/board-tasks", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: newTasks[status], status }),
+          body: JSON.stringify(updatedTask),
         });
       }
 
       if (response.ok) {
         const task = await response.json();
-        
-        // Update boardTasks state based on whether it's a new task or edit
+
         if (editingTask) {
+          // Update the task in the state
           setBoardTasks((prevTasks) =>
             prevTasks.map((t) =>
               t._id === task._id ? { ...t, title: task.title } : t
@@ -54,9 +59,11 @@ const TaskBoard = () => {
           );
           setEditingTask(null); // Reset editing task after successful update
         } else {
+          // Add new task
           setBoardTasks((prevTasks) => [...prevTasks, task]);
         }
 
+        // Clear the input field
         setNewTasks({ ...newTasks, [status]: "" });
       }
     } catch (error) {
@@ -73,7 +80,6 @@ const TaskBoard = () => {
       );
 
       if (response.ok) {
-        // Remove the deleted task from the state
         setBoardTasks((prevTasks) =>
           prevTasks.filter((task) => task._id !== taskId)
         );
@@ -91,17 +97,17 @@ const TaskBoard = () => {
 
   // Render Task Column
   const renderColumn = (status, bgColor) => (
-    <div className={`${bgColor} p-4 rounded-lg shadow-md w-1/3`}>
-      <h2 className="text-xl font-semibold mb-3">{status}</h2>
+    <div className={`${bgColor} p-6 rounded-lg shadow-md w-1/3 min-h-[450px] mt-4`}> {/* Increased padding, min height, and added top margin */}
+      <h2 className="text-xl font-semibold mb-6">{status}</h2> {/* Increased bottom margin */}
 
       {/* Task List */}
-      <div className="space-y-3">
+      <div className="space-y-6"> {/* Increased spacing */}
         {boardTasks
           .filter((task) => task.status === status)
           .map((task) => (
             <div
               key={task._id}
-              className="p-3 bg-white rounded-lg shadow-sm"
+              className="p-4 bg-white rounded-lg shadow-sm"
               style={{
                 whiteSpace: "normal", // Allow text wrapping
                 wordWrap: "break-word", // Break long words if needed
@@ -110,7 +116,7 @@ const TaskBoard = () => {
               {task.title}
 
               {/* Edit and Delete Buttons */}
-              <div className="mt-2 flex justify-between">
+              <div className="mt-3 flex justify-between">
                 <button
                   onClick={() => handleEditTask(task)}
                   className="text-blue-500 hover:text-blue-700"
@@ -129,7 +135,7 @@ const TaskBoard = () => {
       </div>
 
       {/* Input for adding or editing task */}
-      <div className="mt-4">
+      <div className="mt-8"> {/* Added more spacing */}
         <textarea
           placeholder="Enter a note..."
           value={newTasks[status]}
@@ -141,18 +147,20 @@ const TaskBoard = () => {
         />
         <button
           onClick={() => handleAddOrEditTask(status)}
-          className="mt-2 w-full bg-gray-200 text-black text-lg py-2 rounded-lg hover:bg-gray-300 transition"
+          className="mt-4 w-full bg-gray-200 text-black text-lg py-2 rounded-lg hover:bg-gray-300 transition"
         >
-          {editingTask ? "Update Note" : "+ Add Note"}
+          {editingTask && editingTask.status === status
+            ? "Update Note"
+            : "+ Add Note"}
         </button>
       </div>
     </div>
   );
 
   return (
-    <div className="p-6 flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-4">Notepad</h1> {/* Adjusted margin-bottom */}
-      <div className="flex justify-center gap-6 w-full max-w-5xl">
+    <div className="p-12 flex flex-col items-center w-full max-w-7xl mx-auto mt-8"> {/* Increased top padding and margin */}
+      <h1 className="text-3xl font-bold mb-10">Notepad</h1> {/* Increased bottom margin */}
+      <div className="flex justify-center gap-10 w-full"> {/* Increased gap between columns */}
         {renderColumn("To Start", "bg-gray-100")}
         {renderColumn("In Progress", "bg-yellow-100")}
         {renderColumn("Completed", "bg-green-100")}
