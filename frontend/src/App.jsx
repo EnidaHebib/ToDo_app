@@ -7,7 +7,9 @@ import Register from "./pages/Register";
 import TaskForm from "./components/TaskForm";
 import UpdateTask from "./components/UpdateTask";
 import CalendarView from "./pages/CalendarView";
-import Notepad from "./pages/Notepad"; // Import Notepad
+import Notepad from "./pages/Notepad";
+import EventReminder from "./pages/EventReminder";
+import Personal from "./pages/Personal"; // Import Personal.jsx here
 import Footer from "./components/Footer";
 
 function App() {
@@ -34,7 +36,9 @@ function App() {
           <Route path="/add-task" element={<TaskForm />} />
           <Route path="/update-task/:id" element={<UpdateTask />} />
           <Route path="/calendar" element={<CalendarView />} />
-          <Route path="/notepad" element={<Notepad />} /> {/* Notepad route added */}
+          <Route path="/notepad" element={<Notepad />} />
+          <Route path="/event-reminder" element={<EventReminder />} />
+          <Route path="/personal" element={<Personal />} /> {/* Add the route for Personal.jsx */}
         </Routes>
       </div>
       <Footer />

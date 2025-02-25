@@ -33,13 +33,13 @@ const Nav = () => {
   };
 
   return (
-    <nav className="bg-transparent text-gray-800 p-4 font-sans fixed w-full top-0 left-0 z-10">
+    <nav className="bg-transparent text-gray-800 p-4 font-sans w-full top-0 left-0 z-10 fixed">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-cursive font-semibold" style={{ marginLeft: '2.5cm', color: 'black' }}>
+        <h1 className="text-2xl font-cursive font-semibold" style={{ marginLeft: '3.5rem', color: 'black' }}>
           {user ? `Hello, ${user.name}` : "Welcome to Taskly"}
         </h1>
 
-        <div className="space-x-6">
+        <div className="space-x-6 ml-auto">
           <Link to="/" className="btn btn-ghost hover:bg-hover">Home</Link>
           {user ? (
             <>
