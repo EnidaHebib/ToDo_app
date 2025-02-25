@@ -29,7 +29,8 @@ const Login = ({ loginUser }) => {
         // Successfully logged in
         localStorage.setItem("user", JSON.stringify(result.user));  // Save user in localStorage
         loginUser(result.user);  // Update state in App.jsx
-        navigate("/");  // Redirect to home page
+        navigate("/"), { replace: true}; 
+        window.location.reload (); // Redirect to home page
       } else {
         throw new Error("Login failed, user data missing.");
       }
