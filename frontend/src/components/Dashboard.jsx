@@ -4,8 +4,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { label: "Task Manager", path: "/add-task", icon: "➕" },
-    { label: "Calendar & Events", path: "/calendar", icon: "📅" },
+    { label: "Create Task", path: "/add-task", icon: "➕" },
     { label: "Notes & Ideas", path: "/notepad", icon: "📝" },
     { label: "Reminders & Alerts", path: "/event-reminder", icon: "⏰" },
     { label: "Personal", path: "/personal", icon: "✨" },
@@ -23,7 +22,7 @@ const Dashboard = () => {
         {menuItems.map((item, index) => (
           <button
             key={index}
-            className="flex items-center px-10 py-5 rounded-lg bg-white/10 backdrop-blur-md text-lg font-medium text-white shadow-lg transition-all duration-300 hover:bg-white/20 hover:scale-105"
+            className="flex items-center px-10 py-5 rounded-lg bg-white/10 backdrop-blur-md text-lg font-medium text-white shadow-lg transition-all duration-300 hover:bg-white/20 hover:scale-105 w-full text-center"
             onClick={() => navigate(item.path)}
           >
             <span className="mr-4 text-2xl">{item.icon}</span> {item.label}

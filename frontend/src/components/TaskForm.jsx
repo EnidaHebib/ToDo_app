@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 const TaskForm = () => {
   const [taskTitle, setTaskTitle] = useState("");
@@ -6,7 +8,7 @@ const TaskForm = () => {
   const [taskDueDate, setTaskDueDate] = useState("");
   const [taskPriority, setTaskPriority] = useState("medium");
   const [tasks, setTasks] = useState([]);
-
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
     const newTask = {
@@ -22,7 +24,10 @@ const TaskForm = () => {
     setTaskDueDate("");
     setTaskPriority("medium");
   };
-
+  const test = (task) => {
+    console.log(task);
+    navigate(`/update-task/${task.id}`);
+  }
   return (
     <div className="w-full max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold mb-6 text-center text-gray-700">Create New Task</h2>
@@ -100,8 +105,9 @@ const TaskForm = () => {
               <p className="text-xs text-gray-500">Priority: {task.priority}</p>
             </div>
             <div>
-              <button className="bg-yellow-500 text-white py-1 px-4 rounded-md mr-2">
+              <button onClick={()=> test(task)} className="bg-yellow-500 text-white py-1 px-4 rounded-md mr-2">
                 Update
+
               </button>
               <button
                 className="bg-red-500 text-white py-1 px-4 rounded-md"
