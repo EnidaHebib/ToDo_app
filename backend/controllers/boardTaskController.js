@@ -49,6 +49,71 @@ export const updateTaskStatus = async (req, res) => {
   }
 };
 
+// Update task title
+export const updateTaskTitle = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { title } = req.body;
+
+    // Validate input title
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    const task = await BoardTask.findByIdAndUpdate(
+      taskId,
+      { title },  // Update the task's title
+      { new: true } // Return the updated task
+    );
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    res.json(task); // Return updated task with new title
+  } catch (error) {
+    console.error("Error updating task title:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update task (title and/or status)
+export const updateBoardTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { title, status } = req.body;
+
+    // Validate input
+    if (!title && !status) {
+      return res.status(400).json({ message: "Title or status is required" });
+    }
+
+    // Validate status value if provided
+    if (status && !["To Start", "In Progress", "Completed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value." });
+    }
+
+    const updateFields = {};
+    if (title) updateFields.title = title;
+    if (status) updateFields.status = status;
+
+    const task = await BoardTask.findByIdAndUpdate(
+      taskId,
+      updateFields,
+      { new: true }
+    );
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found." });
+    }
+
+    res.json(task); // Return updated task
+  } catch (error) {
+    console.error("Error updating task:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Get all tasks
 export const getBoardTasks = async (req, res) => {
   try {

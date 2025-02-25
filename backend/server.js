@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import boardTaskRoutes from "./routes/boardTaskRoutes.js"; // Updated route
 import userRoutes from "./routes/userRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
 import "./db.js";
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use("/api/board-tasks", boardTaskRoutes); // Updated API route
 app.use("/api/users", userRoutes);
+app.use("/api/tasks", taskRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

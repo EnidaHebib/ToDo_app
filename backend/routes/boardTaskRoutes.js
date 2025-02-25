@@ -3,7 +3,9 @@ import {
   getBoardTasks, 
   addBoardTask, 
   deleteBoardTask, 
-  updateTaskStatus 
+  updateTaskStatus, 
+  updateTaskTitle,
+  updateBoardTask
 } from "../controllers/boardTaskController.js";
 
 const router = express.Router();
@@ -12,6 +14,6 @@ const router = express.Router();
 router.get("/", getBoardTasks); // Get all board tasks
 router.post("/", addBoardTask); // Add new board task
 router.delete("/:taskId", deleteBoardTask); // Delete a board task
-router.put("/:taskId", updateTaskStatus); // Update task status
+router.put("/:taskId", updateBoardTask); // Update task status
 
 export default router;
