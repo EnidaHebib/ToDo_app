@@ -151,7 +151,7 @@ const TaskBoard = () => {
 
   return (
     <div className="p-6 flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-6">Notepad</h1>
+      <h1 className="text-3xl font-bold mb-4">Notepad</h1> {/* Adjusted margin-bottom */}
       <div className="flex justify-center gap-6 w-full max-w-5xl">
         {renderColumn("To Start", "bg-gray-100")}
         {renderColumn("In Progress", "bg-yellow-100")}
