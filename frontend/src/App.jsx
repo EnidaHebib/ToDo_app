@@ -1,7 +1,9 @@
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
+import { ToastContainer } from 'react-toastify';
 import Nav from "./components/Nav";
 import Home from "./pages/Home";
+import Dashboard from "./components/Dashboard.jsx";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import TaskForm from "./components/TaskForm";
@@ -27,6 +29,7 @@ function App() {
   return (
     <>
       <Nav isLoggedIn={user !== null} userName={user ? user.name : ''} logout={logoutUser} />
+
       <div className="container mx-auto p-6">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -40,6 +43,7 @@ function App() {
         </Routes>
       </div>
       <Footer />
+      <ToastContainer />
     </>
   );
 }

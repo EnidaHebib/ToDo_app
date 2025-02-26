@@ -1,31 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from 'react-toastify';
 
 // For color-coding events based on category
 const eventCategories = ["Meeting", "Birthday", "Holiday", "Other"];
 
 const EventReminder = () => {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState(JSON.parse(localStorage.getItem("events")) || []);
   const [event, setEvent] = useState({
     title: "",
     date: "",
     time: "",
-    category: "Meeting", // Default category
+    category: "Meeting",
     description: "",
   });
+
+  useEffect(() => {
+    const timeTracker = setInterval(() => {
+      const currentDate = new Date().toISOString().split("T")[0];
+      const currentTime = new Date().toTimeString().slice(0, 5);
+
+      events?.forEach(event => {
+        if (event.date === currentDate && event.time === currentTime) {
+          toast.success(`Reminder: ${event.title} at ${event.time}`);
+        }
+      });
+    }, 30000);
+
+    return () => clearInterval(timeTracker);
+  }, [events]);
 
   // Handle form changes
   const handleChange = (e) => {
     setEvent({ ...event, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission to add new event
+  // Handle form submission to add a new event
   const handleAddEvent = () => {
     if (!event.title || !event.date || !event.time) {
-      alert("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.");
       return;
     }
-
-    setEvents([...events, event]);
+    toast.success(`Event: ${event.title} was created at ${event.time}`);
+    const updatedEvents = [...events, event];
+    localStorage.setItem("events", JSON.stringify(updatedEvents));
+    setEvents(updatedEvents);
     setEvent({ title: "", date: "", time: "", category: "Meeting", description: "" });
   };
 
@@ -33,24 +51,25 @@ const EventReminder = () => {
   const handleDeleteEvent = (index) => {
     const updatedEvents = events.filter((_, i) => i !== index);
     setEvents(updatedEvents);
+    localStorage.setItem("events", JSON.stringify(updatedEvents)); // Ensure localStorage is updated
   };
 
   // Color-code events based on category
   const getEventCategoryColor = (category) => {
     switch (category) {
       case "Meeting":
-        return "bg-amber-500"; // Warm amber
+        return "bg-stone-400"; // Neutral stone
       case "Birthday":
-        return "bg-pink-500"; // Warm pink
+        return "bg-rose-300"; // Soft rose
       case "Holiday":
-        return "bg-teal-500"; // Warm teal
+        return "bg-cyan-300"; // Gentle cyan
       default:
-        return "bg-orange-500"; // Default warm orange
+        return "bg-stone-300"; // Default neutral tone
     }
   };
 
   return (
-    <div className="p-6 bg-gradient-to-r from-yellow-100 via-pink-100 to-teal-100 min-h-screen">
+    <div className="p-6 bg-gradient-to-r from-stone-100 via-rose-100 to-cyan-100 min-h-screen">
       <h2 className="text-4xl font-semibold text-center text-gray-700 mb-8">Event Reminder</h2>
 
       {/* Form for Adding Events */}
@@ -64,7 +83,7 @@ const EventReminder = () => {
             placeholder="Event Title"
             value={event.title}
             onChange={handleChange}
-            className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
           />
           <div className="flex space-x-4">
             <input
@@ -72,21 +91,21 @@ const EventReminder = () => {
               name="date"
               value={event.date}
               onChange={handleChange}
-              className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
             />
             <input
               type="time"
               name="time"
               value={event.time}
               onChange={handleChange}
-              className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
             />
           </div>
           <select
             name="category"
             value={event.category}
             onChange={handleChange}
-            className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
           >
             {eventCategories.map((category) => (
               <option key={category} value={category}>
@@ -99,12 +118,12 @@ const EventReminder = () => {
             placeholder="Event Description (Optional)"
             value={event.description}
             onChange={handleChange}
-            className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
           ></textarea>
 
           <button
             onClick={handleAddEvent}
-            className="w-full bg-gradient-to-r from-yellow-500 to-pink-500 text-white py-4 rounded-lg hover:bg-gradient-to-l focus:outline-none"
+            className="w-full bg-gradient-to-r from-stone-400 to-rose-400 text-white py-4 rounded-lg hover:bg-gradient-to-l focus:outline-none"
           >
             Add Event
           </button>
@@ -119,7 +138,7 @@ const EventReminder = () => {
           events.map((event, index) => (
             <div
               key={index}
-              className={`border p-4 rounded-lg shadow-lg flex justify-between items-center ${getEventCategoryColor(event.category)} text-white`}
+              className={`border p-4 rounded-lg shadow-lg flex justify-between items-center ${getEventCategoryColor(event.category)} text-gray-900`}
             >
               <div>
                 <h3 className="text-xl font-semibold">{event.title}</h3>
@@ -129,11 +148,11 @@ const EventReminder = () => {
               <div className="flex space-x-4">
                 <button
                   onClick={() => handleDeleteEvent(index)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-rose-500 hover:text-rose-700"
                 >
                   Delete
                 </button>
-                <button className="text-yellow-300 hover:text-yellow-500">Edit</button> {/* Placeholder for edit */}
+                <button className="text-stone-500 hover:text-stone-700">Edit</button> {/* Placeholder for edit */}
               </div>
             </div>
           ))
