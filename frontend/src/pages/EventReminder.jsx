@@ -1,11 +1,23 @@
 import { useState, useEffect } from "react";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // For color-coding events based on category
 const eventCategories = ["Meeting", "Birthday", "Holiday", "Other"];
 
+const modernToastConfig = {
+  position: "top-right",
+  autoClose: 4000,
+  hideProgressBar: false,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: true,
+  theme: "dark", // Modern dark theme
+  icon: "🔔", // Custom bell icon
+};
+
 const EventReminder = () => {
-  const [events, setEvents] = useState(JSON.parse(localStorage.getItem("events")) || []);
+  const [events, setEvents] = useState([]); // No events initially, will fetch from backend
   const [event, setEvent] = useState({
     title: "",
     date: "",
@@ -14,19 +26,41 @@ const EventReminder = () => {
     description: "",
   });
 
+  // Fetch events from the backend when the component mounts
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch("http://localhost:5001/api/events");
+        const data = await response.json();
+        setEvents(data); // Set events from the backend
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        toast.error("⚠️ Failed to fetch events.", modernToastConfig);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   useEffect(() => {
     const timeTracker = setInterval(() => {
-      const currentDate = new Date().toISOString().split("T")[0];
-      const currentTime = new Date().toTimeString().slice(0, 5);
+      const currentDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
+      const currentTime = new Date().toTimeString().slice(0, 5); // Get current time in HH:MM format
 
       events?.forEach(event => {
+        // Ensure event.date and event.time are in the same format
         if (event.date === currentDate && event.time === currentTime) {
-          toast.success(`Reminder: ${event.title} at ${event.time}`);
+          toast.success(`🔔 Reminder: ${event.title} at ${event.time}`, modernToastConfig);
+
+          // Set reminder for 30 minutes later
+          setTimeout(() => {
+            toast.success(`🔔 Reminder: ${event.title} at ${event.time} - Again!`, modernToastConfig);
+          }, 1800000); // 30 minutes in milliseconds
         }
       });
-    }, 30000);
+    }, 30000); // Check every 30 seconds for reminders
 
-    return () => clearInterval(timeTracker);
+    return () => clearInterval(timeTracker); // Clean up on component unmount
   }, [events]);
 
   // Handle form changes
@@ -35,23 +69,53 @@ const EventReminder = () => {
   };
 
   // Handle form submission to add a new event
-  const handleAddEvent = () => {
+  const handleAddEvent = async () => {
     if (!event.title || !event.date || !event.time) {
-      toast.error("Please fill in all required fields.");
+      toast.error("⚠️ Please fill in all required fields.", modernToastConfig);
       return;
     }
-    toast.success(`Event: ${event.title} was created at ${event.time}`);
-    const updatedEvents = [...events, event];
-    localStorage.setItem("events", JSON.stringify(updatedEvents));
-    setEvents(updatedEvents);
-    setEvent({ title: "", date: "", time: "", category: "Meeting", description: "" });
+    
+    try {
+      const response = await fetch("http://localhost:5001/api/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(event),
+      });
+
+      if (response.ok) {
+        const newEvent = await response.json();
+        setEvents([...events, newEvent]);
+        toast.success(`✅ Event: ${newEvent.title} was created at ${newEvent.time}`, modernToastConfig);
+        setEvent({ title: "", date: "", time: "", category: "Meeting", description: "" });
+      } else {
+        toast.error("⚠️ Error adding event", modernToastConfig);
+      }
+    } catch (error) {
+      toast.error("⚠️ Failed to add event", modernToastConfig);
+      console.error("Error adding event:", error);
+    }
   };
 
   // Handle event deletion
-  const handleDeleteEvent = (index) => {
-    const updatedEvents = events.filter((_, i) => i !== index);
-    setEvents(updatedEvents);
-    localStorage.setItem("events", JSON.stringify(updatedEvents)); // Ensure localStorage is updated
+  const handleDeleteEvent = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/events/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        const updatedEvents = events.filter((event) => event._id !== id);
+        setEvents(updatedEvents);
+        toast.info("🗑️ Event deleted.", modernToastConfig);
+      } else {
+        toast.error("⚠️ Failed to delete event", modernToastConfig);
+      }
+    } catch (error) {
+      toast.error("⚠️ Error deleting event", modernToastConfig);
+      console.error("Error deleting event:", error);
+    }
   };
 
   // Color-code events based on category
@@ -135,9 +199,9 @@ const EventReminder = () => {
         {events.length === 0 ? (
           <p className="text-center text-gray-500">No events added yet.</p>
         ) : (
-          events.map((event, index) => (
+          events.map((event) => (
             <div
-              key={index}
+              key={event._id}
               className={`border p-4 rounded-lg shadow-lg flex justify-between items-center ${getEventCategoryColor(event.category)} text-gray-900`}
             >
               <div>
@@ -147,12 +211,11 @@ const EventReminder = () => {
               </div>
               <div className="flex space-x-4">
                 <button
-                  onClick={() => handleDeleteEvent(index)}
+                  onClick={() => handleDeleteEvent(event._id)}
                   className="text-rose-500 hover:text-rose-700"
                 >
                   Delete
                 </button>
-                <button className="text-stone-500 hover:text-stone-700">Edit</button> {/* Placeholder for edit */}
               </div>
             </div>
           ))

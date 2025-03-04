@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import boardTaskRoutes from "./routes/boardTaskRoutes.js"; // Updated route
+import boardTaskRoutes from "./routes/boardTaskRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js"; // Add this
 import "./db.js";
 
 dotenv.config();
@@ -18,9 +19,10 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use("/api/board-tasks", boardTaskRoutes); // Updated API route
+app.use("/api/board-tasks", boardTaskRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/events", eventRoutes); // Add this
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

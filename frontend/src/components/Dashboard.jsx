@@ -31,12 +31,12 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Task Manager Illustration - Adjusted 0.5cm up */}
-      <div className="mt-7.5"> {/* Reduced margin to move it half cm up */}
+      {/* Task Manager Illustration - Rounded and Adjusted */}
+      <div className="mt-7"> {/* Adjusted margin slightly up */}
         <img
           src={taskPhoto} // Using the imported image
           alt="Task Manager Illustration"
-          className="w-32 h-32 object-contain mx-auto" // Image size remains the same
+          className="w-36 h-36 object-cover rounded-full shadow-lg mx-auto" // Added 'rounded-full' for circular shape
         />
       </div>
     </div>
