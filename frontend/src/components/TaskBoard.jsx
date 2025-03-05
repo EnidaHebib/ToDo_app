@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const TaskBoard = () => {
   const [boardTasks, setBoardTasks] = useState([]);
-  const [newTasks, setNewTasks] = useState({
-    "To Start": "",
-    "In Progress": "",
-    "Completed": "",
-  });
-  const [editingTask, setEditingTask] = useState(null);
+  const [newTask, setNewTask] = useState("");
+  const [taskStatus, setTaskStatus] = useState("To Start");
+  const [editTaskId, setEditTaskId] = useState(null);
+  const [updatedTitle, setUpdatedTitle] = useState("");
 
-  // Fetch tasks from backend
   useEffect(() => {
     fetch("http://localhost:5001/api/board-tasks")
       .then((res) => res.json())
@@ -17,154 +15,218 @@ const TaskBoard = () => {
       .catch((err) => console.error("Error fetching tasks:", err));
   }, []);
 
-  // Add or Edit Task
-  const handleAddOrEditTask = async (status) => {
-    if (!newTasks[status].trim()) return;
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
 
-    try {
-      let response;
-      const updatedTask = {
-        title: newTasks[status],
-        status,
-      };
+    const { source, destination } = result;
+    if (source.droppableId === destination.droppableId) return;
 
-      if (editingTask) {
-        // Update existing task
-        response = await fetch(
-          `http://localhost:5001/api/board-tasks/${editingTask._id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedTask),
-          }
-        );
-      } else {
-        // Add new task
-        response = await fetch("http://localhost:5001/api/board-tasks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedTask),
-        });
-      }
+    const taskToMove = boardTasks.find((task) => task._id === result.draggableId);
+    const updatedTask = { ...taskToMove, status: destination.droppableId };
 
-      if (response.ok) {
-        const task = await response.json();
-
-        if (editingTask) {
-          // Update the task in the state
-          setBoardTasks((prevTasks) =>
-            prevTasks.map((t) =>
-              t._id === task._id ? { ...t, title: task.title } : t
-            )
-          );
-          setEditingTask(null); // Reset editing task after successful update
-        } else {
-          // Add new task
-          setBoardTasks((prevTasks) => [...prevTasks, task]);
-        }
-
-        // Clear the input field
-        setNewTasks({ ...newTasks, [status]: "" });
-      }
-    } catch (error) {
-      console.error("Error adding or editing task:", error);
-    }
-  };
-
-  // Delete Task
-  const handleDeleteTask = async (taskId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5001/api/board-tasks/${taskId}`,
-        { method: "DELETE" }
-      );
-
-      if (response.ok) {
+    fetch(`http://localhost:5001/api/board-tasks/${taskToMove._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedTask),
+    })
+      .then((res) => res.json())
+      .then(() => {
         setBoardTasks((prevTasks) =>
-          prevTasks.filter((task) => task._id !== taskId)
+          prevTasks.map((task) => (task._id === taskToMove._id ? updatedTask : task))
         );
-      }
-    } catch (error) {
-      console.error("Error deleting task:", error);
-    }
+      })
+      .catch((err) => console.error("Error updating task:", err));
   };
 
-  // Set task to edit
+  const handleAddTask = () => {
+    if (!newTask.trim()) return;
+
+    const newTaskObj = { title: newTask, status: taskStatus };
+
+    fetch("http://localhost:5001/api/board-tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newTaskObj),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setBoardTasks([...boardTasks, data]);
+        setNewTask("");
+      })
+      .catch((err) => console.error("Error adding task:", err));
+  };
+
   const handleEditTask = (task) => {
-    setNewTasks({ ...newTasks, [task.status]: task.title });
-    setEditingTask(task); // Set task for editing
+    setEditTaskId(task._id);
+    setUpdatedTitle(task.title);
   };
 
-  // Render Task Column
+  const handleUpdateTask = () => {
+    if (!updatedTitle.trim()) return;
+
+    const taskToUpdate = boardTasks.find((task) => task._id === editTaskId);
+    const updatedTask = {
+      _id: editTaskId,
+      title: updatedTitle,
+      status: taskToUpdate.status, // Keep the current status
+    };
+
+    fetch(`http://localhost:5001/api/board-tasks/${editTaskId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedTask),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setBoardTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task._id === editTaskId ? updatedTask : task
+          )
+        );
+        setEditTaskId(null);
+        setUpdatedTitle("");
+      })
+      .catch((err) => console.error("Error updating task:", err));
+  };
+
+  const handleDeleteTask = (taskId) => {
+    fetch(`http://localhost:5001/api/board-tasks/${taskId}`, {
+      method: "DELETE",
+    })
+      .then(() => {
+        setBoardTasks(boardTasks.filter((task) => task._id !== taskId));
+      })
+      .catch((err) => console.error("Error deleting task:", err));
+  };
+
   const renderColumn = (status, bgColor) => (
-    <div className={`${bgColor} p-6 rounded-lg shadow-md w-1/3 min-h-[450px] mt-4`}> {/* Increased padding, min height, and added top margin */}
-      <h2 className="text-xl font-semibold mb-6">{status}</h2> {/* Increased bottom margin */}
-
-      {/* Task List */}
-      <div className="space-y-6"> {/* Increased spacing */}
-        {boardTasks
-          .filter((task) => task.status === status)
-          .map((task) => (
-            <div
-              key={task._id}
-              className="p-4 bg-white rounded-lg shadow-sm"
-              style={{
-                whiteSpace: "normal", // Allow text wrapping
-                wordWrap: "break-word", // Break long words if needed
-              }}
-            >
-              {task.title}
-
-              {/* Edit and Delete Buttons */}
-              <div className="mt-3 flex justify-between">
-                <button
-                  onClick={() => handleEditTask(task)}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteTask(task._id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-      </div>
-
-      {/* Input for adding or editing task */}
-      <div className="mt-8"> {/* Added more spacing */}
-        <textarea
-          placeholder="Enter a note..."
-          value={newTasks[status]}
-          onChange={(e) =>
-            setNewTasks({ ...newTasks, [status]: e.target.value })
-          }
-          className="w-full p-3 border rounded text-sm resize-none"
-          rows="3"
-        />
-        <button
-          onClick={() => handleAddOrEditTask(status)}
-          className="mt-4 w-full bg-gray-200 text-black text-lg py-2 rounded-lg hover:bg-gray-300 transition"
+    <Droppable droppableId={status}>
+      {(provided) => (
+        <div
+          {...provided.droppableProps}
+          ref={provided.innerRef}
+          className={`${bgColor} p-6 rounded-lg shadow-md w-1/3 min-h-[450px] mt-4`}
+          style={{ maxWidth: "400px" }}
         >
-          {editingTask && editingTask.status === status
-            ? "Update Note"
-            : "+ Add Note"}
-        </button>
-      </div>
-    </div>
+          <h2 className="text-xl font-semibold mb-6">{status}</h2>
+          <div className="space-y-6 overflow-y-auto max-h-[400px]">
+            {boardTasks
+              .filter((task) => task.status === status)
+              .map((task, index) => (
+                <Draggable key={task._id} draggableId={task._id} index={index}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className="p-4 bg-white rounded-lg shadow-sm"
+                    >
+                      <div className="text-wrap break-words overflow-hidden">
+                        {task.title}
+                      </div>
+                      <div className="mt-3 flex justify-between">
+                        <button
+                          onClick={() => handleEditTask(task)}
+                          className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-5 py-3 rounded-md text-sm transition-all"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTask(task._id)}
+                          className="bg-red-100 text-red-700 hover:bg-red-200 px-5 py-3 rounded-md text-sm transition-all"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+            {provided.placeholder}
+          </div>
+        </div>
+      )}
+    </Droppable>
   );
 
   return (
-    <div className="p-12 flex flex-col items-center w-full max-w-7xl mx-auto mt-8"> {/* Increased top padding and margin */}
-      <h1 className="text-3xl font-bold mb-10">Notepad</h1> {/* Increased bottom margin */}
-      <div className="flex justify-center gap-10 w-full"> {/* Increased gap between columns */}
-        {renderColumn("To Start", "bg-gray-100")}
-        {renderColumn("In Progress", "bg-yellow-100")}
-        {renderColumn("Completed", "bg-green-100")}
+    <div className="flex flex-col items-center justify-start min-h-screen mt-0">
+      <div className="flex flex-col gap-4 w-full max-w-md items-center mt-10">
+        {/* Task input row */}
+        <div className="flex gap-4 items-center justify-center w-full">
+          <input
+            type="text"
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            placeholder="Enter task title"
+            className="p-4 border rounded-md w-full text-lg"
+            style={{ minWidth: "300px" }}
+          />
+        </div>
+
+        <div className="mt-4" />
+
+        {/* Row of the dropdown and the button */}
+        <div className="flex gap-4 items-center justify-center w-full">
+          <select
+            value={taskStatus}
+            onChange={(e) => setTaskStatus(e.target.value)}
+            className="p-3 border rounded-md text-lg"
+            style={{ minWidth: "150px" }}
+          >
+            <option value="To Start">To Start</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+
+          <button
+            onClick={handleAddTask}
+            className="bg-gray-300 text-gray-700 hover:bg-gray-400 px-6 py-4 rounded-lg text-lg transition-all"
+          >
+            Add Task
+          </button>
+        </div>
+
+        <div className="mt-4" />
       </div>
+
+      {/* Edit Task Popup */}
+      {editTaskId && (
+        <div className="fixed inset-0 flex items-center justify-center z-10 bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/4">
+            <h3 className="text-xl font-semibold mb-4">Edit Task</h3>
+            <input
+              type="text"
+              value={updatedTitle}
+              onChange={(e) => setUpdatedTitle(e.target.value)}
+              className="p-3 border rounded-md w-full max-w-full overflow-x-auto mb-4 text-lg"
+              placeholder="Update task title"
+            />
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handleUpdateTask}
+                className="bg-green-500 text-white px-6 py-3 rounded-md text-lg transition-all"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditTaskId(null)}
+                className="bg-gray-300 text-gray-700 hover:bg-gray-400 px-6 py-3 rounded-md text-lg transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="flex justify-center gap-10 w-full">
+          {renderColumn("To Start", "bg-gray-100")}
+          {renderColumn("In Progress", "bg-yellow-100")}
+          {renderColumn("Completed", "bg-green-100")}
+        </div>
+      </DragDropContext>
     </div>
   );
 };
