@@ -1,85 +1,91 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const UpdateTask = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [dueDate, setDueDate] = useState("");
+  const { state } = useLocation();
+  const { task } = state || {};
+  const [updatedTitle, setUpdatedTitle] = useState(task?.title || "");
+  const [updatedDescription, setUpdatedDescription] = useState(task?.description || "");
+  const [updatedDueDate, setUpdatedDueDate] = useState(task?.dueDate || "");
+  const [updatedPriority, setUpdatedPriority] = useState(task?.priority || "medium");
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchTask();
-    }, []);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const updatedTask = { ...task, title: updatedTitle, description: updatedDescription, dueDate: updatedDueDate, priority: updatedPriority };
 
-    const fetchTask = async () => {
-        try {
-            const response = await fetch(`http://localhost:5001/api/tasks/${id}`); // Updated URL with new port
-            const data = await response.json();
-            setTitle(data.title);
-            setDescription(data.description);
-            setDueDate(data.dueDate);
-        } catch (error) {
-            console.error("Error fetching task:", error);
-        }
-    };
+    // Update task in localStorage
+    const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    const updatedTasks = savedTasks.map((t) => (t.id === task.id ? updatedTask : t));
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const updatedTask = { title, description, dueDate };
+    // Go back to the TaskForm page
+    navigate(-1); // This will take you back to the previous page (TaskForm)
+  };
 
-        try {
-            const response = await fetch(`http://localhost:5001/api/tasks/${id}`, { // Updated URL with new port
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedTask),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to update task");
-            }
-
-            navigate("/tasks");
-        } catch (error) {
-            console.error("Error updating task:", error);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4 font-sans">
+  return (
+    <div className="p-6 bg-gradient-to-r from-stone-100 via-rose-100 to-cyan-100 min-h-screen">
+      <div className="max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-lg">
+        <h2 className="text-3xl font-semibold mb-6 text-gray-700">Update Task</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="title" className="text-lg text-gray-700">Task Title</label>
             <input
-                type="text"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-button"
-                required
+              type="text"
+              id="title"
+              value={updatedTitle}
+              onChange={(e) => setUpdatedTitle(e.target.value)}
+              className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              placeholder="Enter task title"
+              required
             />
+          </div>
 
+          <div>
+            <label htmlFor="description" className="text-lg text-gray-700">Description</label>
             <textarea
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="textarea textarea-bordered w-full focus:outline-none focus:ring-2 focus:ring-button"
-                required
-            />
+              id="description"
+              value={updatedDescription}
+              onChange={(e) => setUpdatedDescription(e.target.value)}
+              className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              placeholder="Describe the task"
+              rows="4"
+            ></textarea>
+          </div>
 
+          <div>
+            <label htmlFor="dueDate" className="text-lg text-gray-700">Due Date</label>
             <input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-button"
-                required
+              type="date"
+              id="dueDate"
+              value={updatedDueDate}
+              onChange={(e) => setUpdatedDueDate(e.target.value)}
+              className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+              required
             />
+          </div>
 
-            <button
-                type="submit"
-                className="btn bg-button text-white w-full hover:bg-hover transition"
+          <div>
+            <label htmlFor="priority" className="text-lg text-gray-700">Priority</label>
+            <select
+              id="priority"
+              value={updatedPriority}
+              onChange={(e) => setUpdatedPriority(e.target.value)}
+              className="w-full p-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
             >
-                Update Task
-            </button>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+
+          <button type="submit" className="w-full bg-gradient-to-r from-stone-400 to-rose-400 text-white py-4 rounded-lg hover:bg-gradient-to-l focus:outline-none">
+            Update Task
+          </button>
         </form>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default UpdateTask;

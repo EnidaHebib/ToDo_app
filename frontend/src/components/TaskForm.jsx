@@ -9,13 +9,11 @@ const TaskForm = () => {
   const [tasks, setTasks] = useState([]);
   const navigate = useNavigate();
 
-  // Load tasks from localStorage when the component mounts
   useEffect(() => {
     const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
     setTasks(savedTasks);
   }, []);
 
-  // Save tasks to localStorage whenever tasks state changes
   useEffect(() => {
     if (tasks.length > 0) {
       localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -57,16 +55,14 @@ const TaskForm = () => {
 
   const handleUpdate = (task) => {
     console.log(task);
-    navigate(`/update-task/${task.id}`);
+    navigate(`/update-task/${task.id}`, { state: { task } });
   };
 
   return (
     <div className="p-6 bg-gradient-to-r from-stone-100 via-rose-100 to-cyan-100 min-h-screen">
       <div className="flex flex-col md:flex-row justify-between w-full max-w-8xl mx-auto p-8 bg-white rounded-lg shadow-lg mb-2">
-        {/* Left Side - Form */}
         <div className="w-full md:w-5/12 p-4">
           <h2 className="text-3xl font-semibold mb-6 text-gray-700">Create New Task</h2>
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="title" className="text-lg text-gray-700">Task Title</label>
@@ -80,7 +76,6 @@ const TaskForm = () => {
                 required
               />
             </div>
-
             <div>
               <label htmlFor="description" className="text-lg text-gray-700">Description</label>
               <textarea
@@ -92,7 +87,6 @@ const TaskForm = () => {
                 rows="4"
               ></textarea>
             </div>
-
             <div>
               <label htmlFor="dueDate" className="text-lg text-gray-700">Due Date</label>
               <input
@@ -104,7 +98,6 @@ const TaskForm = () => {
                 required
               />
             </div>
-
             <div>
               <label htmlFor="priority" className="text-lg text-gray-700">Priority</label>
               <select
@@ -118,37 +111,31 @@ const TaskForm = () => {
                 <option value="high">High</option>
               </select>
             </div>
-
             <button type="submit" className="w-full bg-gradient-to-r from-stone-400 to-rose-400 text-white py-4 rounded-lg hover:bg-gradient-to-l focus:outline-none">
               Add Task
             </button>
           </form>
         </div>
-
-        {/* Right Side - Tasks List */}
         <div className="w-full md:w-5/12 p-4">
           <h2 className="text-2xl font-semibold text-gray-700 text-center">Your Tasks</h2>
           <ul className="space-y-4 mt-4">
             {tasks.map((task) => (
-              <li
-                key={task.id}
-                className={`border p-6 rounded-lg shadow-lg flex justify-between items-center ${task.priority === "high" ? 'bg-red-100' : task.priority === "medium" ? 'bg-yellow-100' : 'bg-green-100'}`}
-              >
+              <li key={task.id} className={`border p-6 rounded-lg shadow-lg flex flex-col space-y-4 ${task.priority === "high" ? 'bg-red-100' : task.priority === "medium" ? 'bg-yellow-100' : 'bg-green-100'}`}>                
                 <div>
-                  <h3 className="font-semibold text-xl">{task.title}</h3>
-                  <p className="text-sm text-gray-600">{task.description}</p>
+                  <h3 className="font-semibold text-xl break-words">{task.title}</h3>
+                  <p className="text-sm text-gray-600 whitespace-pre-wrap">{task.description}</p>
                   <p className="text-xs text-gray-500">Due: {task.dueDate}</p>
                   <p className="text-xs text-gray-500">Priority: {task.priority}</p>
                 </div>
-                <div>
-                  <button onClick={() => handleUpdate(task)} className="bg-yellow-500 text-white py-2 px-5 rounded-md mr-2">
+                <div className="flex justify-end space-x-2">
+                  <button onClick={() => handleUpdate(task)} className="bg-yellow-400 text-white py-2 px-5 rounded-md w-24">
                     Update
                   </button>
-                  <button className="bg-red-500 text-white py-2 px-5 rounded-md"
+                  <button className="bg-red-400 text-white py-2 px-5 rounded-md w-24"
                     onClick={() => {
                       const updatedTasks = tasks.filter((t) => t.id !== task.id);
                       setTasks(updatedTasks);
-                      localStorage.setItem("tasks", JSON.stringify(updatedTasks)); // Remove task from localStorage
+                      localStorage.setItem("tasks", JSON.stringify(updatedTasks));
                     }}
                   >
                     Delete
