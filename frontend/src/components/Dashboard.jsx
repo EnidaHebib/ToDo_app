@@ -18,8 +18,8 @@ const Dashboard = () => {
         Dashboard
       </h1>
 
-      {/* Menu Items - Adjusted to be half cm down */}
-      <div className="flex flex-col items-center gap-8 mt-11 mb-auto">
+      {/* Menu Items - Adjusted to be exactly 1cm (approx. 38px) further down */}
+      <div className="flex flex-col items-center gap-8 mt-16 mb-auto">  
         {menuItems.map((item, index) => (
           <button
             key={index}

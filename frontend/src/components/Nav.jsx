@@ -35,7 +35,15 @@ const Nav = () => {
   return (
     <nav className="bg-transparent text-gray-800 p-4 font-sans w-full top-0 left-0 z-10 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-semibold" style={{ marginLeft: '8rem', fontFamily: 'Sacramento, cursive', letterSpacing: '1px' }}>
+        <h1
+          className="text-2xl font-semibold"
+          style={{
+            marginLeft: '10%', // Adjusted the margin to move text more to the right
+            fontFamily: 'Sacramento, cursive',
+            letterSpacing: '1px',
+            whiteSpace: 'nowrap' // Prevents text from wrapping
+          }}
+        >
           {user ? `Hello,${user.name}` : "Welcome to Taskly"}
         </h1>
 
