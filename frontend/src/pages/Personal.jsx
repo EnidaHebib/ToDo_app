@@ -21,7 +21,23 @@ const Personal = () => {
       const randomIndex = Math.floor(Math.random() * quotes.length);
       setQuote(quotes[randomIndex]);
     };
+
+    const getRandomInspiration = () => {
+      const inspirations = [
+        "Stay positive and keep going!",
+        "The best way to predict your future is to create it.",
+        "Hard work beats talent when talent doesn't work hard.",
+        "Success doesn't come from what you do occasionally, it comes from what you do consistently.",
+        "If you want to achieve greatness, stop asking for permission.",
+        "Everything you can imagine is real.",
+        "Don't watch the clock; do what it does. Keep going."
+      ];
+      const randomIndex = Math.floor(Math.random() * inspirations.length);
+      setInspiration(inspirations[randomIndex]);
+    };
+
     getRandomQuote();
+    getRandomInspiration();
 
     // Fetch latest movie trailers from TMDB API
     const fetchLatestTrailers = async () => {
