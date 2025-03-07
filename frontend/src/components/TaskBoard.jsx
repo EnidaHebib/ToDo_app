@@ -150,7 +150,7 @@ const TaskBoard = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen mt-0">
+    <div className="flex flex-col items-center justify-start min-h-screen mt-[-47.8px]">
       <div className="flex flex-col gap-4 w-full max-w-md items-center mt-10">
         {/* Task input row */}
         <div className="flex gap-4 items-center justify-center w-full">
